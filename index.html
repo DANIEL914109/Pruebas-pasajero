@@ -18,6 +18,50 @@
       padding: 0.5em;
       font-size: 1em;
     }
+    /* Estilos del botón y modal de video */
+    #btnVideo {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 5;
+      padding: 10px 15px;
+      font-size: 16px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #videoModal {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 10;
+      justify-content: center;
+      align-items: center;
+    }
+    #videoModal div {
+      position: relative;
+      width: 80%;
+      max-width: 800px;
+    }
+    #cerrarVideo {
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      font-weight: bold;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -32,6 +76,20 @@
   </select>
 
   <div id="map"></div>
+
+  <!-- Botón de video -->
+  <button id="btnVideo">Ver video</button>
+
+  <!-- Modal de video -->
+  <div id="videoModal">
+    <div>
+      <button id="cerrarVideo">X</button>
+      <video id="videoRecorrido" width="100%" controls>
+        <source src="" type="video/mp4">
+        Tu navegador no soporta video HTML5.
+      </video>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -68,91 +126,108 @@
             { location: { lat: 20.662724, lng: -103.350227 }, stopover: true },
           ]
         };
-      }else if (rutaSeleccionada === "LM-V01R") {
+      } else if (rutaSeleccionada === "LM-V01R") {
         return {
           origen: { lat: 20.662764, lng: -103.345814 },
           destino: { lat: 20.452093, lng: -103.420612 },   
           waypoints: [
-            { location: { lat: 20.663007, lng: -103.352604 }, stopover: true }, //constituyentes y calz. del aguila
-            { location: { lat: 20.658398, lng: -103.353717 }, stopover: true }, //del aguila y washington
-            { location: { lat: 20.665238, lng: -103.372348 }, stopover: true }, //mariano otero   
-            { location: { lat: 20.476155, lng: -103.440711 }, stopover: true }, //san sebastian 
-            { location: { lat: 20.467975, lng: -103.440510 }, stopover: true }, //calle higuera 
-            { location: { lat: 20.458643, lng: -103.440889 }, stopover: true }, //cto metropolitano sur 20.460323, -103.425680
-            { location: { lat: 20.460323, lng: -103.425680 }, stopover: true }, //cam antiguo
-
+            { location: { lat: 20.663007, lng: -103.352604 }, stopover: true },
+            { location: { lat: 20.658398, lng: -103.353717 }, stopover: true },
+            { location: { lat: 20.665238, lng: -103.372348 }, stopover: true },   
+            { location: { lat: 20.476155, lng: -103.440711 }, stopover: true },
+            { location: { lat: 20.467975, lng: -103.440510 }, stopover: true },
+            { location: { lat: 20.458643, lng: -103.440889 }, stopover: true },
+            { location: { lat: 20.460323, lng: -103.425680 }, stopover: true },
           ] 
         };
-      }else if (rutaSeleccionada === "C47-V1") {
+      } else if (rutaSeleccionada === "C47-V1") {
         return {
           origen: { lat: 20.594628, lng: -103.334091 },
           destino: { lat: 20.669754, lng: -103.347026 },    
           waypoints: [
-            { location: { lat: 20.606665, lng: -103.337170  }, stopover: true }, //delicias   
-            { location: { lat: 20.609337, lng: -103.336780  }, stopover: true }, // orozco  
-            { location: { lat: 20.614133, lng: -103.331507 }, stopover: true }, // lauro badillo  
-            { location: { lat: 20.616730, lng: -103.332171 }, stopover: true }, // rivera  
-            { location: { lat: 20.621239, lng: -103.328962 }, stopover: true }, //toneles  
-            { location: { lat: 20.622590, lng: -103.332670 }, stopover: true }, //compresor  
-            { location: { lat: 20.623540, lng: -103.331908 }, stopover: true }, //calderas  
-            { location: { lat: 20.626496, lng: -103.330191 }, stopover: true }, //lazaro cardenas
-          ] // Si tienes waypoints agrégalos aquí
+            { location: { lat: 20.606665, lng: -103.337170  }, stopover: true },
+            { location: { lat: 20.609337, lng: -103.336780  }, stopover: true },
+            { location: { lat: 20.614133, lng: -103.331507 }, stopover: true },
+            { location: { lat: 20.616730, lng: -103.332171 }, stopover: true },
+            { location: { lat: 20.621239, lng: -103.328962 }, stopover: true },
+            { location: { lat: 20.622590, lng: -103.332670 }, stopover: true },
+            { location: { lat: 20.623540, lng: -103.331908 }, stopover: true },
+            { location: { lat: 20.626496, lng: -103.330191 }, stopover: true },
+          ]
         };
       }
-      // Puedes agregar otras rutas con sus datos aquí
       return null;
     }
 
     window.initMap = function () {
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 19.4326, lng: -99.1332 },
-        zoom: 14
+        zoom: 15
       });
 
       directionsService = new google.maps.DirectionsService();
+
+      // Seguimiento del usuario
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+          (position) => {
+            const userPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+            map.setCenter(userPos);
+
+            if (!markers["usuario"]) {
+              markers["usuario"] = new google.maps.Marker({
+                position: userPos,
+                map,
+                title: "Tú estás aquí",
+                icon: {
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 10,
+                  fillColor: "#00FF00",
+                  fillOpacity: 1,
+                  strokeWeight: 2,
+                  strokeColor: "#00FF00"
+                }
+              });
+            } else {
+              markers["usuario"].setPosition(userPos);
+            }
+          },
+          (error) => console.warn("No se pudo obtener la ubicación:", error),
+          { enableHighAccuracy: true }
+        );
+      }
 
       const select = document.getElementById("ruta");
       select.addEventListener("change", () => {
         const rutaSeleccionada = select.value;
         rutaSeleccionadaGlobal = rutaSeleccionada;
 
-        // Limpia marcadores
+        // Limpiar marcadores de vehículos
         for (const key in markers) {
-          markers[key].setMap(null);
-        }
-        markers = {};
-
-        // Limpia listener Firebase
-        if (currentRef) {
-          off(currentRef);
-          currentRef = null;
+          if (key !== "usuario") markers[key].setMap(null);
         }
 
-        // Limpia ruta en mapa
-        if (directionsRenderer) {
-          directionsRenderer.setMap(null);
-          directionsRenderer = null;
-        }
+        // Limpiar listener Firebase
+        if (currentRef) { off(currentRef); currentRef = null; }
+
+        // Limpiar ruta en mapa
+        if (directionsRenderer) { directionsRenderer.setMap(null); directionsRenderer = null; }
 
         if (!rutaSeleccionada) return;
 
-        // Configura color según ruta seleccionada
         const polylineOptions = (rutaSeleccionada === "LM-V01") ? {
-          strokeColor: "#00FF00", // Verde para T01
-          strokeWeight: 5
+          strokeColor: "#00FF00", strokeWeight: 5
         } : (rutaSeleccionada === "LM-V01R") ? {
-          strokeColor: "#00FF00", // Verde para LM-V01R
-          strokeWeight: 5
+          strokeColor: "#FF9900", strokeWeight: 5
         } : {
-          strokeColor: "#1976d2", // Azul para otras rutas
-          strokeWeight: 5
+          strokeColor: "#1976d2", strokeWeight: 5
         };
 
-        // Crear nuevo directionsRenderer con color correspondiente
         directionsRenderer = new google.maps.DirectionsRenderer({
           map: map,
           suppressMarkers: true,
-          polylineOptions: polylineOptions
+          polylineOptions: polylineOptions,
+          preserveViewport: true
         });
 
         const datosRuta = obtenerDatosRuta(rutaSeleccionada);
@@ -165,7 +240,6 @@
           }, (result, status) => {
             if (status === google.maps.DirectionsStatus.OK) {
               directionsRenderer.setDirections(result);
-              ajustarCamara(result, []);
             } else {
               console.error("Error al trazar la ruta:", status);
             }
@@ -178,22 +252,12 @@
           const data = snapshot.val();
           if (!data) return;
 
-          const posiciones = [];
-
           if (data.lat && data.lng) {
             updateMarker(rutaSeleccionada, data.lat, data.lng);
-            posiciones.push({ lat: data.lat, lng: data.lng });
           } else {
             Object.entries(data).forEach(([id, pos]) => {
-              if (pos.lat && pos.lng) {
-                updateMarker(id, pos.lat, pos.lng);
-                posiciones.push({ lat: pos.lat, lng: pos.lng });
-              }
+              if (pos.lat && pos.lng) updateMarker(id, pos.lat, pos.lng);
             });
-          }
-
-          if (directionsRenderer && directionsRenderer.getDirections()) {
-            ajustarCamara(directionsRenderer.getDirections(), posiciones);
           }
         });
       });
@@ -201,10 +265,10 @@
 
     function updateMarker(id, lat, lng) {
       const busIcon = { 
-        url: 'https://i.imgur.com/QByNhob.png', // Ícono de autobús público
-        scaledSize: new google.maps.Size(30, 30), // Tamaño del ícono
+        url: 'https://i.imgur.com/QByNhob.png',
+        scaledSize: new google.maps.Size(50, 50),
         origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(20, 40) // Ancla el icono al centro base
+        anchor: new google.maps.Point(25, 50)
       };
 
       if (!markers[id]) {
@@ -219,18 +283,34 @@
       }
     }
 
-    function ajustarCamara(directionsResult, posicionesVehiculos) {
-      const bounds = new google.maps.LatLngBounds();
+    // --- Video por ruta ---
+    const btnVideo = document.getElementById('btnVideo');
+    const videoModal = document.getElementById('videoModal');
+    const cerrarVideo = document.getElementById('cerrarVideo');
+    const videoRecorrido = document.getElementById('videoRecorrido');
 
-      // Añade todos los puntos de la ruta
-      const route = directionsResult.routes[0];
-      route.overview_path.forEach(point => bounds.extend(point));
+    const videosPorRuta = {
+      "LM-V01": "videosLM-V01.mp4",
+      "LM-V01R": "videosLM-V01R.mp4",
+      "C47-V1": "videosC47-V1.mp4"
+    };
 
-      // Añade posiciones de vehículos
-      posicionesVehiculos.forEach(pos => bounds.extend(pos));
+    btnVideo.addEventListener('click', () => {
+      const rutaSeleccionada = document.getElementById('ruta').value;
+      if (!rutaSeleccionada || !videosPorRuta[rutaSeleccionada]) {
+        alert("Por favor selecciona una ruta primero");
+        return;
+      }
+      videoRecorrido.src = videosPorRuta[rutaSeleccionada];
+      videoModal.style.display = 'flex';
+      videoRecorrido.play();
+    });
 
-      map.fitBounds(bounds);
-    }
+    cerrarVideo.addEventListener('click', () => {
+      videoModal.style.display = 'none';
+      videoRecorrido.pause();
+      videoRecorrido.currentTime = 0;
+    });
   </script>
 
   <script async defer
