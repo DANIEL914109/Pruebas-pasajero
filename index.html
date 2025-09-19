@@ -2,323 +2,346 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Pasajero - Moviit</title>
+  <title>Para amorcito</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+
   <style>
-    #map {
-      height: 90vh;
-      width: 100%;
-    }
+    :root { color-scheme: light dark; }
     body {
       margin: 0;
-      font-family: sans-serif;
-      text-align: center;
-    }
-    select {
-      margin: 1em;
-      padding: 0.5em;
-      font-size: 1em;
-    }
-    /* Estilos del botón y modal de video */
-    #btnVideo {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      z-index: 5;
-      padding: 30px 45px;
-      font-size: 30px;
-      background-color: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #videoModal {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.8);
-      z-index: 10;
-      justify-content: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 1rem 1.25rem 1rem;
+      background: linear-gradient(135deg, #fff6e5 0%, #ffe8f5 50%, #e8f5ff 100%);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
     }
-    #videoModal div {
-      position: relative;
-      width: 80%;
-      max-width: 800px;
+
+    .wrap {
+      display: grid;
+      gap: 0.5rem;
+      width: min(1000px, 92vw);
     }
-    #cerrarVideo {
-      position: absolute;
-      top: -30px;
-      right: -30px;
-      background: red;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      font-weight: bold;
+
+    .frase {
+      font-family: "Dancing Script", cursive;
+      font-size: clamp(1.3rem, 2.4vw + 0.5rem, 2rem);
+      line-height: 1.3;
+      text-align: center;
+      color: #3b3b3b;
+      text-shadow: 0 1px 0 rgba(255,255,255,.6);
+      padding: .25rem .5rem 0 .5rem;
+    }
+    .corazon {
+      display: inline-block;
+      transform-origin: center;
+      animation: latido 1.35s ease-in-out infinite;
+      will-change: transform, filter;
+      filter: drop-shadow(0 2px 6px rgba(255, 64, 129, 0.25));
+    }
+    @keyframes latido {
+      0%   { transform: scale(1); }
+      15%  { transform: scale(1.18); }
+      30%  { transform: scale(0.98); }
+      45%  { transform: scale(1.12); }
+      60%  { transform: scale(1); }
+      100% { transform: scale(1); }
+    }
+
+    .controls {
+      display: flex;
+      gap: .6rem;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: .6rem 1rem;
+      border-radius: .7rem;
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.7);
+      backdrop-filter: blur(4px);
+      font-weight: 700;
       cursor: pointer;
+      transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+      color: #000;
+    }
+    button:hover { transform: translateY(-1px); }
+    #draw { background: #ffe082; border-color: #d7a600; }
+    #count {
+      min-width: 2ch;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #000;
+    }
+
+    @media (max-width: 768px) {
+      button, #count { color: #000 !important; }
+    }
+
+    canvas {
+      width: 100%;
+      height: min(45vh, 420px);
+      border-radius: 14px;
+      box-shadow: 0 12px 36px rgba(0,0,0,.12);
+      background: #87ceeb;
     }
   </style>
 </head>
 <body>
-
-  <h2>Ubicación del Transporte</h2>
-  <label for="ruta">Selecciona la ruta:</label>
-  <select id="ruta">
-    <option value="">-- Elige una ruta --</option>
-    <option value="LM-V01">LM-V01(Central vieja)</option>
-    <option value="LM-V01R">LM-V01(La noria)</option>
-    <option value="C47-V1">C47-V1(Dos templos)</option>
-  </select>
-
-  <div id="map"></div>
-
-  <!-- Botón de video -->
-  <button id="btnVideo">Ver video</button>
-
-  <!-- Modal de video -->
-  <div id="videoModal">
-    <div>
-      <button id="cerrarVideo">X</button>
-      <video id="videoRecorrido" width="100%" controls>
-        <source src="" type="video/mp4">
-        Tu navegador no soporta video HTML5.
-      </video>
+  <div class="wrap">
+    <div class="frase">
+      “Así como los girasoles necesitan ser regados, regaré nuestro amor con pequeños detalles para que nunca se marchite. ¡Te amo, cariño!”
+      <span class="corazon" aria-hidden="true">❤️</span>
     </div>
+
+    <div class="controls">
+      <button id="minus" aria-label="Restar">−</button>
+      <span id="count">0</span>
+      <button id="plus" aria-label="Sumar">+</button>
+      <button id="draw">Dibujar</button>
+    </div>
+
+    <canvas id="cv" width="1200" height="500"></canvas>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, onValue, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  <script>
+    const MAX = 5;
+    let n = 0;
+    const elCount = document.getElementById('count');
+    const btnPlus = document.getElementById('plus');
+    const btnMinus = document.getElementById('minus');
+    const btnDraw = document.getElementById('draw');
+    const cv = document.getElementById('cv');
+    const ctx = cv.getContext('2d');
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCcVJ7HJM3gS10BcCNdxGmRx5ypzTizNYg",
-      authDomain: "moviit-928f2.firebaseapp.com",
-      databaseURL: "https://moviit-928f2-default-rtdb.firebaseio.com",
-      projectId: "moviit-928f2",
-      storageBucket: "moviit-928f2.appspot.com",
-      messagingSenderId: "753483147976",
-      appId: "1:753483147976:web:1057942a7b78444ebf13fd"
-    };
+    btnPlus.onclick = () => { if (n < MAX) { n++; elCount.textContent = n; } };
+    btnMinus.onclick = () => { if (n > 0)   { n--; elCount.textContent = n; } };
 
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    let map;
-    let markers = {};
-    let currentRef = null;
-    let directionsService;
-    let directionsRenderer;
-    let rutaSeleccionadaGlobal = null;
-
-    function obtenerDatosRuta(rutaSeleccionada) {
-      if (rutaSeleccionada === "LM-V01") {
-        return {
-          origen: { lat: 20.452031, lng: -103.420501 },
-          destino: { lat: 20.662764, lng: -103.345814 }, 
-          waypoints: [
-            { location: { lat: 20.664631, lng: -103.370325 }, stopover: true },
-            { location: { lat: 20.658245, lng: -103.353675 }, stopover: true },
-            { location: { lat: 20.662724, lng: -103.350227 }, stopover: true },
-          ]
-        };
-      } else if (rutaSeleccionada === "LM-V01R") {
-        return {
-          origen: { lat: 20.662764, lng: -103.345814 },
-          destino: { lat: 20.452093, lng: -103.420612 },   
-          waypoints: [
-            { location: { lat: 20.663007, lng: -103.352604 }, stopover: true },
-            { location: { lat: 20.658398, lng: -103.353717 }, stopover: true },
-            { location: { lat: 20.665238, lng: -103.372348 }, stopover: true },   
-            { location: { lat: 20.476155, lng: -103.440711 }, stopover: true },
-            { location: { lat: 20.467975, lng: -103.440510 }, stopover: true },
-            { location: { lat: 20.458643, lng: -103.440889 }, stopover: true },
-            { location: { lat: 20.460323, lng: -103.425680 }, stopover: true },
-          ] 
-        };
-      } else if (rutaSeleccionada === "C47-V1") {
-        return {
-          origen: { lat: 20.594628, lng: -103.334091 },
-          destino: { lat: 20.669754, lng: -103.347026 },    
-          waypoints: [
-            { location: { lat: 20.606665, lng: -103.337170  }, stopover: true },
-            { location: { lat: 20.609337, lng: -103.336780  }, stopover: true },
-            { location: { lat: 20.614133, lng: -103.331507 }, stopover: true },
-            { location: { lat: 20.616730, lng: -103.332171 }, stopover: true },
-            { location: { lat: 20.621239, lng: -103.328962 }, stopover: true },
-            { location: { lat: 20.622590, lng: -103.332670 }, stopover: true },
-            { location: { lat: 20.623540, lng: -103.331908 }, stopover: true },
-            { location: { lat: 20.626496, lng: -103.330191 }, stopover: true },
-          ]
-        };
+    function computeLayout(count, w, h) {
+      if (count === 0) return [];
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      const rows = 1;
+      const cols = count;
+      const marginX = 40, marginY = 40;
+      const cellW = (w - marginX*2) / cols;
+      const cellH = (h - marginY*2) / rows;
+      const size = Math.min(cellW, cellH);
+      const list = [];
+      const grassTop = h * 0.75;
+      for (let i = 0; i < count; i++) {
+        const c = i;
+        const x = marginX + c * cellW + cellW/2;
+        if (isMobile) {
+          const s = Math.max(0.45, Math.min(1.0, size/160));
+          const stemLength = 140 * s;
+          const y = grassTop - stemLength;
+          list.push({x, y, size});
+        } else {
+          const y = marginY + cellH/2;
+          list.push({x, y, size});
+        }
       }
-      return null;
+      return list;
     }
 
-    window.initMap = function () {
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 19.4326, lng: -99.1332 },
-        zoom: 15
-      });
-
-      directionsService = new google.maps.DirectionsService();
-
-      // Seguimiento del usuario
-      if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(
-          (position) => {
-            const userPos = { lat: position.coords.latitude, lng: position.coords.longitude };
-            map.setCenter(userPos);
-
-            if (!markers["usuario"]) {
-              markers["usuario"] = new google.maps.Marker({
-                position: userPos,
-                map,
-                title: "Tú estás aquí",
-                icon: {
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 10,
-                  fillColor: "#00FF00",
-                  fillOpacity: 1,
-                  strokeWeight: 2,
-                  strokeColor: "#00FF00"
-                }
-              });
-            } else {
-              markers["usuario"].setPosition(userPos);
-            }
-          },
-          (error) => console.warn("No se pudo obtener la ubicación:", error),
-          { enableHighAccuracy: true }
-        );
-      }
-
-      const select = document.getElementById("ruta");
-      select.addEventListener("change", () => {
-        const rutaSeleccionada = select.value;
-        rutaSeleccionadaGlobal = rutaSeleccionada;
-
-        // Limpiar marcadores de vehículos
-        for (const key in markers) {
-          if (key !== "usuario") markers[key].setMap(null);
-        }
-
-        // Limpiar listener Firebase
-        if (currentRef) { off(currentRef); currentRef = null; }
-
-        // Limpiar ruta en mapa
-        if (directionsRenderer) { directionsRenderer.setMap(null); directionsRenderer = null; }
-
-        if (!rutaSeleccionada) return;
-
-        const polylineOptions = (rutaSeleccionada === "LM-V01") ? {
-          strokeColor: "#00FF00", strokeWeight: 5
-        } : (rutaSeleccionada === "LM-V01R") ? {
-          strokeColor: "#FF9900", strokeWeight: 5
-        } : {
-          strokeColor: "#1976d2", strokeWeight: 5
-        };
-
-        directionsRenderer = new google.maps.DirectionsRenderer({
-          map: map,
-          suppressMarkers: true,
-          polylineOptions: polylineOptions,
-          preserveViewport: true
-        });
-
-        const datosRuta = obtenerDatosRuta(rutaSeleccionada);
-        if (datosRuta) {
-          directionsService.route({
-            origin: datosRuta.origen,
-            destination: datosRuta.destino,
-            waypoints: datosRuta.waypoints,
-            travelMode: google.maps.TravelMode.DRIVING
-          }, (result, status) => {
-            if (status === google.maps.DirectionsStatus.OK) {
-              directionsRenderer.setDirections(result);
-            } else {
-              console.error("Error al trazar la ruta:", status);
-            }
-          });
-        }
-
-        // Escucha ubicación de conductores
-        currentRef = ref(database, 'conductores/' + rutaSeleccionada);
-        onValue(currentRef, (snapshot) => {
-          const data = snapshot.val();
-          if (!data) return;
-
-          if (data.lat && data.lng) {
-            updateMarker(rutaSeleccionada, data.lat, data.lng);
-          } else {
-            Object.entries(data).forEach(([id, pos]) => {
-              if (pos.lat && pos.lng) updateMarker(id, pos.lat, pos.lng);
-            });
-          }
-        });
-      });
-    };
-
-    function updateMarker(id, lat, lng) {
-      const busIcon = { 
-        url: 'https://i.imgur.com/QByNhob.png',
-        scaledSize: new google.maps.Size(50, 50),
-        origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(25, 50)
-      };
-
-      if (!markers[id]) {
-        markers[id] = new google.maps.Marker({
-          position: { lat, lng },
-          map,
-          title: id,
-          icon: busIcon
-        });
-      } else {
-        markers[id].setPosition({ lat, lng });
-      }
+    function withDash(progress, totalLen=1) {
+      const dash = totalLen * progress + 1e-6;
+      ctx.setLineDash([dash, 1e6]);
+      ctx.lineDashOffset = 0;
     }
 
-    // --- Video por ruta ---
-    const btnVideo = document.getElementById('btnVideo');
-    const videoModal = document.getElementById('videoModal');
-    const cerrarVideo = document.getElementById('cerrarVideo');
-    const videoRecorrido = document.getElementById('videoRecorrido');
+    function drawStem(x, y, s, t) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.lineWidth = 4 * s;
+      ctx.strokeStyle = '#2e7d32';
+      ctx.fillStyle = '#43a047';
+      ctx.beginPath();
+      ctx.moveTo(0, s*10);
+      ctx.quadraticCurveTo(s*5, s*70, 0, s*140);
+      withDash(t, 160*s);
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(s*10, s*90);
+      ctx.rotate(-0.3);
+      ctx.beginPath();
+      ctx.ellipse(0,0, s*26*t, s*14*t, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+      ctx.restore();
+    }
 
-    const videosPorRuta = {
-      "LM-V01": "videosLM-V01.mp4",
-      "LM-V01R": "videosLM-V01R.mp4",
-      "C47-V1": "videosC47-V1.mp4"
-    };
+    function drawPetals(x, y, s, t) {
+      const petals = 18;
+      for (let i = 0; i < petals; i++) {
+        const appear = (i+1)/petals;
+        const pt = Math.min(1, Math.max(0, (t - (appear-1/petals)) * petals));
+        if (pt <= 0) continue;
+        const a = i * (Math.PI*2/petals);
+        const rx = s*34, ry = s*16;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(a);
+        ctx.beginPath();
+        ctx.strokeStyle = '#f6b704';
+        ctx.lineWidth = 6*s;
+        withDash(pt, 120*s);
+        ctx.ellipse(0, -s*20, rx, ry, 0, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.globalAlpha = 0.25 + 0.55*pt;
+        ctx.fillStyle = '#ffd54f';
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+    }
 
-    btnVideo.addEventListener('click', () => {
-      const rutaSeleccionada = document.getElementById('ruta').value;
-      if (!rutaSeleccionada || !videosPorRuta[rutaSeleccionada]) {
-        alert("Por favor selecciona una ruta primero");
+    function drawCenter(x, y, s, t) {
+      const r = s*24;
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#5d4037';
+      ctx.lineWidth = 6*s;
+      withDash(t, 200*s);
+      ctx.arc(x, y, r, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 0.2 + 0.8*t;
+      ctx.fillStyle = '#6d4c41';
+      ctx.beginPath(); ctx.arc(x, y, r*0.98, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
+      const dots = 80;
+      for (let i=0;i<dots;i++){
+        const k = i/dots;
+        if (k > t) break;
+        const rr = r*0.9*Math.sqrt(k);
+        const ang = i*0.9;
+        const px = x + rr*Math.cos(ang);
+        const py = y + rr*Math.sin(ang);
+        ctx.fillStyle = '#3e2723';
+        ctx.beginPath(); ctx.arc(px, py, 1.5*s, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function remap(v, a, b) { return (v-a) / (b-a); }
+    function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+
+    function drawSunflowerProgressive(x, y, size, p) {
+      const s = Math.max(0.35, Math.min(0.9, size/160));
+      const pStem   = clamp01(remap(p, 0.00, 0.35));
+      const pPetals = clamp01(remap(p, 0.20, 0.80));
+      const pCenter = clamp01(remap(p, 0.60, 1.00));
+      drawStem(x, y, s, pStem);
+      drawPetals(x, y, s, pPetals);
+      drawCenter(x, y, s, pCenter);
+    }
+
+    function drawBackground() {
+      const w = cv.width;
+      const h = cv.height;
+      const sky = ctx.createLinearGradient(0, 0, 0, h*0.75);
+      sky.addColorStop(0, "#87ceeb");
+      sky.addColorStop(1, "#b0e0e6");
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h*0.75);
+      for (let i = 0; i < 5; i++) {
+        const x = (w/5) * i + 60;
+        const y = 40 + (i%2)*20;
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.beginPath();
+        ctx.arc(x, y, 40, 0, Math.PI*2);
+        ctx.arc(x+30, y+10, 30, 0, Math.PI*2);
+        ctx.arc(x-30, y+10, 30, 0, Math.PI*2);
+        ctx.fill();
+      }
+      const grass = ctx.createLinearGradient(0, h*0.75, 0, h);
+      grass.addColorStop(0, "#6ab04c");
+      grass.addColorStop(1, "#27ae60");
+      ctx.fillStyle = grass;
+      ctx.fillRect(0, h*0.75, w, h*0.25);
+    }
+
+    let flowers = [];
+    let raf = null;
+    let lastTime = 0;
+
+    function startAnimation(count) {
+      const layout = computeLayout(count, cv.width, cv.height);
+      flowers = layout.map((pos, i) => ({
+        ...pos,
+        p: 0,
+        delay: i * 120
+      }));
+      cancelAnimationFrame(raf);
+      lastTime = performance.now();
+      animate(lastTime);
+    }
+
+    function animate(tNow) {
+      const dt = Math.min(32, tNow - lastTime);
+      lastTime = tNow;
+      ctx.clearRect(0,0,cv.width, cv.height);
+      drawBackground();
+      let allDone = true;
+      for (const f of flowers) {
+        const localTime = Math.max(0, (tNow - (lastTime - dt) - f.delay));
+        if (localTime < 0) { allDone = false; continue; }
+        const speed = 0.0009;
+        f.p = Math.min(1, f.p + speed * dt);
+        if (f.p < 1) allDone = false;
+        drawSunflowerProgressive(f.x, f.y, f.size, f.p);
+      }
+      if (!allDone) raf = requestAnimationFrame(animate);
+    }
+
+    function resizeCanvasToDisplaySize() {
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      const cssW = cv.clientWidth;
+      const cssH = cv.clientHeight;
+      const needResize = cv.width !== Math.round(cssW*dpr) || cv.height !== Math.round(cssH*dpr);
+      if (needResize) {
+        cv.width = Math.round(cssW*dpr);
+        cv.height = Math.round(cssH*dpr);
+        ctx.scale(dpr, dpr);
+      }
+    }
+    const ro = new ResizeObserver(() => {
+      ctx.setTransform(1,0,0,1,0,0);
+      resizeCanvasToDisplaySize();
+      if (flowers.length) {
+        lastTime = performance.now();
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(animate);
+      }
+    });
+    ro.observe(cv);
+
+    btnDraw.onclick = () => {
+      if (n <= 0) {
+        flowers = [];
+        ctx.clearRect(0,0,cv.width, cv.height);
+        drawBackground();
         return;
       }
-      videoRecorrido.src = videosPorRuta[rutaSeleccionada];
-      videoModal.style.display = 'flex';
-      videoRecorrido.play();
-    });
+      ctx.setTransform(1,0,0,1,0,0);
+      resizeCanvasToDisplaySize();
+      startAnimation(n);
+    };
 
-    cerrarVideo.addEventListener('click', () => {
-      videoModal.style.display = 'none';
-      videoRecorrido.pause();
-      videoRecorrido.currentTime = 0;
-    });
+    resizeCanvasToDisplaySize();
+    drawBackground();
   </script>
-
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBm-0RbxDUhygQlvNwJSGxxbbwarll1q8o&callback=initMap">
-  </script>
-
 </body>
 </html>
-
-
-
